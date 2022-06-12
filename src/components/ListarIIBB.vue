@@ -77,25 +77,63 @@
                     
                     // ACA SE DEFINE EL TEXTFIELD PARA EDICION DE BASE IMPONIBLE
                     <template v-slot:[`item.BASE_IMPONIBLE`]="{ item }">
-                        <v-text-field type="number" @keypress="isNumber($event)"  v-on:blur="calcularIIBB(editedItem.BASE_IMPONIBLE,item)" v-model="editedItem.BASE_IMPONIBLE" :hide-details="true" dense single-line :autofocus="true" v-if="item.RECNO === editedItem.RECNO"></v-text-field>
+                        <v-text-field @keypress="isNumber($event)"  v-model="editedItem.BASE_IMPONIBLE" :hide-details="true" dense single-line :autofocus="true" v-if="item.RECNO === editedItem.RECNO"></v-text-field>
                         <span v-else>{{item.BASE_IMPONIBLE}}</span>
                     </template>   
                     // ACA SE DEFINEN LOS BOTONES DE ACCION DE LA TABLA                 
                     <template v-slot:[`item.actions`]="{ item }">
                         <div v-if="item.RECNO === editedItem.RECNO">
-                            <v-icon color="red" class="mr-3" @click="close(item)">
-                                mdi-window-close
-                            </v-icon>
-                            <v-icon color="green"  @click="save">
-                                mdi-content-save
-                            </v-icon>
+                            <div @click="close(item)">
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on, attrs }">
+                                            <v-icon color="red" class="mr-3"    v-bind="attrs" v-on="on">
+                                                mdi-window-close
+                                            </v-icon>
+                                    </template>
+                                    <span>Cancelar</span>
+                                </v-tooltip>
+                            </div> 
+                            <div v-if="item.BASE_IMPONIBLE <= 0" @click="calcularIIBB(editedItem.BASE_IMPONIBLE,item)">
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on, attrs }">
+                                            <v-icon color="green"   v-bind="attrs" v-on="on">
+                                                mdi-check
+                                            </v-icon>
+                                    </template>
+                                    <span>Pre-calcular impuesto</span>
+                                </v-tooltip>
+                            </div> 
+                            <div v-if="item.IMPORTE_IIBB > 0" @click="save">
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on, attrs }">
+                                            <v-icon color="green"   v-bind="attrs" v-on="on">
+                                                mdi-file-document-outline
+                                            </v-icon>
+                                    </template>
+                                    <span>Facturar impuesto calculado</span>
+                                </v-tooltip>
+                            </div>  
                         </div>
-                        <div v-else>
-                            <v-icon v-if="item.Seleccionado == true && validacionEdicionHabil(item.FECHA_VENC)" color="green" class="mr-3" @click="editItem(item)">
-                                mdi-pencil
-                            </v-icon>                            
+                        <div v-else-if="item.Seleccionado == 'primero declarar' && validacionEdicionHabil(item.FECHA_VENC)" color="green" class="mr-3" @click="editItem(item)" >
+                            <v-tooltip top>
+                                <template v-slot:activator="{ on, attrs }">
+                                        <v-icon color="green"   v-bind="attrs" v-on="on">
+                                            mdi-pencil
+                                        </v-icon>
+                                </template>
+                                <span>Ingresar base imponible</span>
+                            </v-tooltip>
+                        </div> 
+                        <div v-if="item.Seleccionado == 'declarado'" color="green" class="mr-3" >
+                            <v-tooltip top>
+                                <template v-slot:activator="{ on, attrs }">
+                                        <v-icon color="green"   v-bind="attrs" v-on="on">
+                                            mdi-check-all
+                                        </v-icon>
+                                </template>
+                                <span>Ingreso bruto declarado</span>
+                            </v-tooltip>
                         </div>
-                        <!--  -->
                     </template>
                 </v-data-table>
             </v-card>
@@ -241,8 +279,6 @@ methods: {
     },
     calcularIIBB(baseImp,item)
     {
-        console.log(moment('20220607').format("DD/MM/YYYY"))
-        console.log(moment('2309').format("hh:mm"))
         if (baseImp > 0 )
         {
             this.obtenerImporteIIBB(baseImp);
