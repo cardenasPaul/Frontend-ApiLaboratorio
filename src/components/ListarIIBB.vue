@@ -69,7 +69,7 @@
                         <span>{{ formatearFecha(item.FECHA_VENC)}}</span>
                     </template>
                     <template v-slot:[`item.FECHA_DECLARACION`]="{ item }">
-                        <span>{{ formatearFechaConHora(item.FECHA_DECLARACION)}}</span>
+                        <span>{{ formatearFecha(item.FECHA_DECLARACION)}}</span>
                     </template>
                     <template v-slot:[`item.FECHA_PAGO`]="{ item }">
                         <span>{{ formatearFechaConHora(item.FECHA_PAGO)}}</span>
@@ -77,7 +77,7 @@
                     
                     // ACA SE DEFINE EL TEXTFIELD PARA EDICION DE BASE IMPONIBLE
                     <template v-slot:[`item.BASE_IMPONIBLE`]="{ item }">
-                        <v-text-field @keypress="isNumber($event)"  v-model="editedItem.BASE_IMPONIBLE" :hide-details="true" dense single-line :autofocus="true" v-if="item.RECNO === editedItem.RECNO"></v-text-field>
+                        <v-text-field @keypress="isNumber($event, editedItem.BASE_IMPONIBLE)"  v-model="editedItem.BASE_IMPONIBLE" :hide-details="true" dense single-line :autofocus="true" v-if="item.RECNO === editedItem.RECNO"></v-text-field>
                         <span v-else>{{item.BASE_IMPONIBLE}}</span>
                     </template>   
                     // ACA SE DEFINEN LOS BOTONES DE ACCION DE LA TABLA                 
@@ -157,13 +157,22 @@ export default {
     },
 methods: {    
     ////validacion de entrada numerica
-    isNumber: function(evt)  {
-        const keysAllowed = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    isNumber: function(evt, item)  {
+        const keysAllowed = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'];
         const keyPressed=  evt.key;
         
-        if (!keysAllowed.includes(keyPressed)) {
+        if (!keysAllowed.includes(keyPressed) || this.validarDecimales(keyPressed, item)) {
             evt.preventDefault()
         }
+    },
+    validarDecimales(key, item) {
+        if(item.includes('.')){
+            if(item.length-item.indexOf('.') > 2){
+                console.log("more")
+                return true
+            }
+        }
+        return false
     },
 // METODO DE CARGA DE LA GRILLA
     async obtenerIIBBContribuyente()
@@ -192,7 +201,6 @@ methods: {
         }
     },
     formatearFechaConHora(fecha) {
-        console.log(fecha)
             if (moment(fecha).isValid())
             {
                 return moment(fecha).format("DD/MM/YYYY HH:mm")
@@ -312,11 +320,11 @@ data(){
                     { text: 'RECNO', value: 'RECNO', align: ' d-none', class: 'light-blue darken-4 white--text', sortable: false},
                     { text: 'PERIODO', value: 'PERIODO', class: 'light-blue darken-4 white--text', sortable: false},
                     { text: 'FECHA VENCIMIENTO', value: 'FECHA_VENC',  class: 'light-blue darken-4 white--text', sortable: false},
-                    { text: 'BASE IMPONIBLE', value: 'BASE_IMPONIBLE', class: 'light-blue darken-4 white--text', sortable: false},
-                    { text: 'ALICUOTA', value: 'ALICUOTA', class: 'light-blue darken-4 white--text', sortable: false},
-                    { text: 'IMPORTE IIBB', value: 'IMPORTE_IIBB', class: 'light-blue darken-4 white--text', sortable: false},
+                    { text: 'BASE IMPONIBLE', value: 'BASE_IMPONIBLE', class: 'light-blue darken-4 white--text',align: 'right', sortable: false},
+                    { text: 'ALICUOTA', value: 'ALICUOTA', class: 'light-blue darken-4 white--text',align: 'right', sortable: false},
+                    { text: 'IMPORTE IIBB', value: 'IMPORTE_IIBB', class: 'light-blue darken-4 white--text',align: 'right', sortable: false},
                     { text: 'FECHA DECLARACION', value: 'FECHA_DECLARACION', class: 'light-blue darken-4 white--text', sortable: false},
-                    { text: 'ID FACTURA', value: 'ID_FACTURA', class: 'light-blue darken-4 white--text', sortable: false},
+                    { text: 'ID FACTURA', value: 'ID_FACTURA', class: 'light-blue darken-4 white--text',align: 'right', sortable: false},
                     { text: 'FECHA PAGO', value: 'FECHA_PAGO', class: 'light-blue darken-4 white--text', sortable: false},
                     { text: 'ACCIONES', value: 'actions', class: 'light-blue darken-4 white--text', sortable: false , width: "100px"},
                     { text: 'Seleccionado', value: 'Seleccionado', align: ' d-none', class: 'light-blue darken-4 white--text', sortable: false},

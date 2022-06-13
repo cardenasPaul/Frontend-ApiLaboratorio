@@ -58,7 +58,8 @@ export default {
                 domicilio:'',
                 telefono:'',
                 cuit:''
-            }
+            },
+            largoMaximo: 12
         };
     },
     methods:{
@@ -99,7 +100,7 @@ export default {
             const keysAllowed = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
             const keyPressed=  evt.key;
             
-            if (!keysAllowed.includes(keyPressed)) {
+            if ((!keysAllowed.includes(keyPressed)) || this.cuit.length >= this.largoMaximo-1) {
                 evt.preventDefault()
             }
         }
