@@ -216,7 +216,6 @@ methods: {
                 }else{
                     item.BASE_IMPONIBLE = item.BASE_IMPONIBLE.toString()+'.00'
                 }
-                //
             }); 
         });
         return ultimaFecha;
