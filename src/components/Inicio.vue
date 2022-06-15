@@ -15,7 +15,6 @@
                 <v-subheader dark="true">Ingrese el CUIT del Contribuyente</v-subheader>
                 <v-text-field 
                     v-model="cuit"
-                    type="number"
                     width="350"
                     label="CUIT"
                     outlined

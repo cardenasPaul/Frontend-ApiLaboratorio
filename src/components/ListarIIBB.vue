@@ -183,10 +183,40 @@ methods: {
         axios.get(url).then((respuesta)=>{
             this.movprodsalientes  = respuesta.data;   
             respuesta.data.forEach(function(item) {
+                
                 if(item.IMPORTE_IIBB == null && ultimaFecha == null){
                     ultimaFecha = item.FECHA_VENC;
                     this.lastDate = item.FECHA_VENC;
                 }
+                //fomateo del ingreso bruto
+                if(item.IMPORTE_IIBB.toString().includes('.')){
+                    var valueFloat = item.IMPORTE_IIBB.toString()+'00' //se agregarn ceros para evitar numeros con decimales de menos
+                    var splitIndex = valueFloat.indexOf('.') + 3
+                    var mediumValue = parseFloat(valueFloat.substr(0,splitIndex) + '5')
+                    
+                    if(mediumValue<item.IMPORTE_IIBB){
+                        item.IMPORTE_IIBB = (item.IMPORTE_IIBB + 0.01).toString().substr(0,splitIndex)
+                    }else{
+                        item.IMPORTE_IIBB = valueFloat.substr(0,splitIndex)
+                    }
+                }else{
+                    item.IMPORTE_IIBB = item.IMPORTE_IIBB.toString()+'.00'
+                }
+                //formateo de la base imponible
+                if(item.BASE_IMPONIBLE.toString().includes('.')){
+                    var valueFloatB = item.BASE_IMPONIBLE.toString()+'00' //se agregarn ceros para evitar numeros con decimales de menos
+                    var splitIndexB = valueFloatB.indexOf('.') + 3
+                    var mediumValueB = parseFloat(valueFloatB.substr(0,splitIndexB) + '5')
+                    
+                    if(mediumValueB<item.BASE_IMPONIBLE){
+                        item.BASE_IMPONIBLE = (item.BASE_IMPONIBLE + 0.01).toString().substr(0,splitIndexB)
+                    }else{
+                        item.BASE_IMPONIBLE = valueFloatB.substr(0,splitIndexB)
+                    }
+                }else{
+                    item.BASE_IMPONIBLE = item.BASE_IMPONIBLE.toString()+'.00'
+                }
+                
             }); 
         });
         return ultimaFecha;
@@ -212,7 +242,7 @@ methods: {
     },
     validacionEdicionHabil(itemFecha){
         var mesItem = moment(itemFecha).format("MM")
-        if(mesItem<this.mesActual()){
+        if(mesItem<this.mesActual()-1){
             return true
         }
         return false
@@ -250,7 +280,13 @@ methods: {
     save () {
       if (this.editedIndex > -1) {
         try{
-            var url = 'http://localhost:8090/api/altaFactura?baseImponible='+this.editedItem.BASE_IMPONIBLE+'&idContribuyente='+this.id+'&recnoMontoProductoSaliente='+this.editedItem.RECNO;
+            var url = 'http://localhost:8090/api/altaFactura?baseImponible='
+            + this.editedItem.BASE_IMPONIBLE
+            +'&idContribuyente='
+            +this.id
+            +'&recnoMontoProductoSaliente='
+            +this.editedItem.RECNO;
+            console.log(url);
             let respuesta = axios.put(url).then(this.snackbar = true)
             if (respuesta.status === 201)
             {
@@ -258,8 +294,9 @@ methods: {
             }
             setTimeout(() => {
                 console.log("recargando")
-                window.location.reload();
-            }, 3000)
+                //this.movprodsalientes = []// se vacia la tabla para actualizarla
+                this.obtenerIIBBContribuyente();
+            }, 1000)
         }catch(error){
             console.log(error);
         }
