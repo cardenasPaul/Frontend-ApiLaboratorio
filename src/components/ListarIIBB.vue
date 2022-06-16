@@ -241,7 +241,7 @@ methods: {
     },
     validacionEdicionHabil(itemFecha){
         var mesItem = moment(itemFecha).format("MM")
-        if(mesItem<this.mesActual()){
+        if(mesItem<this.mesActual()+1){
             return true
         }
         return false
